@@ -5,6 +5,7 @@
 String scannedTag;
 int interuptCount = 0;
 bool shush = false;
+bool first = true;
 typedef struct {
   String ID;
   String name;
@@ -12,8 +13,7 @@ typedef struct {
   long scannedAt;
   bool hasScanned;
 } tag ;
-bool goalList[2] = {false, false};
-
+long lastTagScannedAt = 0;
 tag tagList[25];
 #define PN532_SCK  (2)
 #define PN532_MOSI (3)
@@ -21,7 +21,7 @@ tag tagList[25];
 #define PN532_MISO (5)
 #define PIN            9
 #define NUMPIXELS      16
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(30, PIN, NEO_RGB + NEO_KHZ800);
 #define PN532_IRQ   (2)
 #define PN532_RESET (3)  // Not connected by default on the NFC Shield
 Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
@@ -99,13 +99,26 @@ void loop(void) {
     }
     Serial.flush();
   }
+  for (int i = 0; i < sizeof(tagList); i++)  {
+    lightsGoGo(i, tagList[i].hasScanned);
+  }
+}
+void lightsGoGo(int which, bool hasScanned) {
+  if (hasScanned) {
+    flicker(which);
+  }
+}
+void flicker(int light) { // TO DO: Add for all 7 tags
+  pixels.setPixelColor(light, pixels.Color(255 / random(2, 6), 255, 0)); // !Moderately bright green color.
+  pixels.show();
 }
 void check(String scan, int check) {
   if (scan == tagList[check].ID) {
     if (tagList[check].hasScanned != true) {
       tagList[check].hasScanned = true;
       tagList[check].scannedAt = (millis());
-      checkInterupt(tagList[check].scannedAt);
+      checkInterupt(lastTagScannedAt);
+      lastTagScannedAt = millis();
       Serial.println(tagList[check].name);
     }
   } else {
@@ -113,12 +126,16 @@ void check(String scan, int check) {
   }
 }
 void checkInterupt(long startTime) {
-  if (millis() < (startTime + 60000)) {
-    if (interuptCount < 3) {
-      Serial.println("reginterupt");
-      interuptCount++;
+  if (lastTagScannedAt) {
+    if (millis() < (startTime + 60000)) {
+      if (interuptCount < 3) {
+        Serial.println("reginterupt");
+        interuptCount++;
+      } else {
+        Serial.println("interuptoverlaod");
+      }
     } else {
-      Serial.println("interuptoverlaod");
+      first = false;
     }
   }
 }
