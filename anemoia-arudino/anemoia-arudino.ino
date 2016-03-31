@@ -1,6 +1,5 @@
 #include <Wire.h>
 #include <SPI.h>
-#include <Adafruit_PN532.h>
 #include "FastLED.h"
 
 #define BAUD_RATE 9600
@@ -48,7 +47,6 @@ Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 
 void setup(void) {
   Serial.begin(BAUD_RATE);
-
   // search for "struct tag" to see what these values correspond to
   tags[0] = (struct tag) { "paper1", "0x40x1760x1510x2340x2010x720x128", 0, 5000, CHSV(random8(64), 150, 255), 0 };
   tags[1] = (struct tag) { "paper2", "0x40x1560x1510x2340x2010x720x128", 1, 5000, CHSV(random8(64), 150, 255), 0 };
