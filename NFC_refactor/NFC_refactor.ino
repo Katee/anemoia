@@ -2,8 +2,8 @@
 #include <SPI.h>
 #include <Adafruit_NeoPixel.h>  
 #include <Adafruit_PN532.h>
-#define BAUD_RATE 9600
 String scannedTag;
+int interuptCount = 0;
 typedef struct{
   String ID;
   String name;
@@ -18,7 +18,6 @@ tag tagList[25];
 #define PN532_MISO (5)
 #define PIN            9
 #define NUMPIXELS      16
-
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 #define PN532_IRQ   (2)
 #define PN532_RESET (3)  // Not connected by default on the NFC Shield
@@ -48,7 +47,7 @@ void setup(void) {
   tagList[21] = { "0x40x880x1700x2340x2010x720x129", "dogskull", 60000, 0, false};
   tagList[22] = { "0x40x1450x1510x2340x2010x720x129", "knife", 60000, 0, false};
   tagList[23] = { "0x40x2450x1510x2340x2010x720x128", "scroll", 60000, 0, false};
-  Serial.begin(BAUD_RATE);
+  Serial.begin(9600);
   Serial.println("Hello!");
   nfc.begin();
   pixels.begin(); // This initializes the NeoPixel library.
@@ -81,7 +80,9 @@ void loop(void) {
         scannedTag = scannedTag + "0x" + uid[i];
       }
       for (int i = 0; i < sizeof(tagList); i++)  {
-        check(scannedTag, i);
+        if(interuptCount > 2){
+         check(scannedTag, i);
+        }
       }
       scannedTag = "";
     }
@@ -106,9 +107,12 @@ void check(String scan, int check) {
 }
 void checkInterupt(long startTime){
   if(millis() < (startTime + 60000)){ 
-    Serial.println("INTERUPT");
-  } else { 
-    //Serial.println("JUST PLAYIN");
+    if(interuptCount < 3){
+     Serial.println("reginterupt");
+     interuptCount++;
+    } else{ 
+      Serial.println("interuptoverlaod");
+    }
   }
 }
 
