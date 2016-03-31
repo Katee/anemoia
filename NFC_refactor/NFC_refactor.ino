@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_NeoPixel.h>  
@@ -97,9 +96,19 @@ void check(String scan, int check) {
   if (scan == tagList[check].ID) {
     if (tagList[check].hasScanned != true) {
       tagList[check].hasScanned = true;
+      tagList[check].scannedAt = (millis());
+      checkInterupt(tagList[check].scannedAt);
       Serial.println(tagList[check].name);
     }
   } else {
     //  Serial.println("NOO");
   }
 }
+void checkInterupt(long startTime){
+  if(millis() < (startTime + 60000)){ 
+    Serial.println("INTERUPT");
+  } else { 
+    //Serial.println("JUST PLAYIN");
+  }
+}
+
