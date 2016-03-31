@@ -1,16 +1,19 @@
 #include <Wire.h>
 #include <SPI.h>
-#include <Adafruit_NeoPixel.h>  
+#include <Adafruit_NeoPixel.h>
 #include <Adafruit_PN532.h>
 String scannedTag;
 int interuptCount = 0;
-typedef struct{
+bool shush = false;
+typedef struct {
   String ID;
   String name;
   float audioLength;
   long scannedAt;
   bool hasScanned;
 } tag ;
+bool goalList[2] = {false, false};
+
 tag tagList[25];
 #define PN532_SCK  (2)
 #define PN532_MOSI (3)
@@ -38,7 +41,7 @@ void setup(void) {
   tagList[12] = { "0x40x1440x1510x2340x2010x720x129", "mousejaws", 60000, 0, false};
   tagList[13] = { "0x40x1360x1510x2340x2010x720x128", "birdbones", 60000, 0, false};
   tagList[14] = { "0x40x890x1700x2340x2010x720x129", "musicbox", 60000, 0, false};
-  tagList[15] = { "0x40x1310x1510x2340x2010x720x129", "barth", 60000, 0, false};  
+  tagList[15] = { "0x40x1310x1510x2340x2010x720x129", "barth", 60000, 0, false};
   tagList[16] = { "0x40x30x1510x2340x2010x720x129", "feathervial", 60000, 0, false};
   tagList[17] = { "0x40x530x1700x2340x2010x720x129", "cowtooth", 60000, 0, false};
   tagList[18] = { "0x40x1110x1700x2340x2010x720x129", "whistle", 60000, 0, false};
@@ -64,7 +67,6 @@ void setup(void) {
   nfc.SAMConfig();
   Serial.println("Waiting for an ISO14443A Card ...");
 }
-
 void loop(void) {
   uint8_t success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -80,8 +82,13 @@ void loop(void) {
         scannedTag = scannedTag + "0x" + uid[i];
       }
       for (int i = 0; i < sizeof(tagList); i++)  {
-        if(interuptCount > 2){
-         check(scannedTag, i);
+        if ((tagList[22].hasScanned) || (tagList[23].hasScanned)) {
+          if (!shush) {
+            Serial.println("NotSayingANyMore");
+            shush = true;
+          }
+        } else {
+          check(scannedTag, i);
         }
       }
       scannedTag = "";
@@ -105,12 +112,12 @@ void check(String scan, int check) {
     //  Serial.println("NOO");
   }
 }
-void checkInterupt(long startTime){
-  if(millis() < (startTime + 60000)){ 
-    if(interuptCount < 3){
-     Serial.println("reginterupt");
-     interuptCount++;
-    } else{ 
+void checkInterupt(long startTime) {
+  if (millis() < (startTime + 60000)) {
+    if (interuptCount < 3) {
+      Serial.println("reginterupt");
+      interuptCount++;
+    } else {
       Serial.println("interuptoverlaod");
     }
   }
