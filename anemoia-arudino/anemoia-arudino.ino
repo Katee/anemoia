@@ -8,12 +8,13 @@
 
 #define NUM_TAGS   25
 
-long interruptEndsAt = 0;
-long playedHelloAt = 0;
-long becomeAnnoyedAfter = 5000;
 #define LIGHTING_UPDATE_TIME 100
 
 unsigned long lastLightingUpdate = 0;
+
+unsigned long interruptEndsAt = 0;
+unsigned long playedHelloAt = 0;
+unsigned long becomeAnnoyedAfter = 5000;
 bool playedAnnoyed = false;
 bool playedMusicalGoal = false;
 bool playedFamilyGoal = false;
@@ -139,65 +140,18 @@ void loop(void) {
 
     Serial.println("\nscanned tag: " + scannedTag);
 
-    // play random interruption 
-    if (millis() < interruptEndsAt) {
-      interruptEndsAt = 0;
-      Serial.println("interrupted0" + String(random(1, 3)));
-
-      tags[lastScannedTagIndex].scannedAt = 0;
-      
-      return;
-    }
-
-    for (int i = 0; i < NUM_TAGS; i++) {
-      // ignore the ones that don't match
-      if (scannedTag != tags[i].tag) {
-        continue;
-      }
-
-      lastScannedTagIndex = i;
-      
-      tags[i].scannedAt = millis();
-      interruptEndsAt = tags[i].scannedAt + tags[i].audioLength;
-
-      Serial.println(tags[i].name);
-    }
-
-    if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && !playedMusicalGoal) {
-      playedMusicalGoal = true;
-      Serial.println("musicgoal");
-      leds[0] = CRGB(255, 255, 0);
-      delay(3000);
-    }
-    if (tags[2].scannedAt != 0 && tags[3].scannedAt != 0 && !playedNavigationalGoal) {
-      playedNavigationalGoal = true;
-      Serial.println("navigationalgoal");
-      leds[1] = CRGB(65, 150, 0);
-      delay(3000);
-    }
-    if (tags[4].scannedAt != 0 && tags[5].scannedAt != 0 && !playedFamilyGoal) {
-      playedFamilyGoal = true;
-      Serial.println("familygoal");
-      leds[2] = CRGB(0, 0, 250);
-      delay(3000);
-    }
-    if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && tags[6].scannedAt != 0 && !playedHistoryGoal) {
-      playedHistoryGoal = true;
-      Serial.println("historygoal");
-      leds[7] = CRGB(90, 0, 250);
-      delay(3000);
-    }
+    handleScannedTag(scannedTag);
   }
 
   if (!hasPlayedHello()) {
     int sensorValue = analogRead(A0);
     if (sensorValue > 100) {
       Serial.println("\nHello0" + String(random(1, 6)));
-      playedHelloAt = millis();
+      playedHelloAt = loopTime;
     }
   }
   
-  if (!playedAnnoyed && !hasScannedTag() && hasPlayedHello() && ((millis() - playedHelloAt) > becomeAnnoyedAfter)) {
+  if (!playedAnnoyed && !hasScannedTag() && hasPlayedHello() && ((loopTime - playedHelloAt) > becomeAnnoyedAfter)) {
     Serial.println("\nannoyed0" + String(random(1, 2)));
     playedAnnoyed = true;
   }
@@ -241,5 +195,56 @@ void updateCloudLights() {
   }
 
   FastLED.show();
+}
+
+void handleScannedTag(String scannedTag) {
+  // play random interruption 
+  if (loopTime < interruptEndsAt) {
+    interruptEndsAt = 0;
+    Serial.println("interrupted0" + String(random(1, 3)));
+
+    tags[lastScannedTagIndex].scannedAt = 0;
+    
+    return;
+  }
+
+  for (int i = 0; i < NUM_TAGS; i++) {
+    // ignore the ones that don't match
+    if (scannedTag != tags[i].tag) {
+      continue;
+    }
+
+    lastScannedTagIndex = i;
+    
+    tags[i].scannedAt = loopTime;
+    interruptEndsAt = tags[i].scannedAt + tags[i].audioLength;
+
+    Serial.println(tags[i].name);
+  }
+
+  if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && !playedMusicalGoal) {
+    playedMusicalGoal = true;
+    Serial.println("musicgoal");
+    leds[0] = CRGB(255, 255, 0);
+    delay(3000);
+  }
+  if (tags[2].scannedAt != 0 && tags[3].scannedAt != 0 && !playedNavigationalGoal) {
+    playedNavigationalGoal = true;
+    Serial.println("navigationalgoal");
+    leds[1] = CRGB(65, 150, 0);
+    delay(3000);
+  }
+  if (tags[4].scannedAt != 0 && tags[5].scannedAt != 0 && !playedFamilyGoal) {
+    playedFamilyGoal = true;
+    Serial.println("familygoal");
+    leds[2] = CRGB(0, 0, 250);
+    delay(3000);
+  }
+  if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && tags[6].scannedAt != 0 && !playedHistoryGoal) {
+    playedHistoryGoal = true;
+    Serial.println("historygoal");
+    leds[7] = CRGB(90, 0, 250);
+    delay(3000);
+  }
 }
 
