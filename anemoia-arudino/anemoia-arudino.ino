@@ -28,7 +28,6 @@ struct tag {
   long audioLength;
   unsigned long scannedAt;
 };
-
 struct tag tags[NUM_TAGS];
 
 String lastScannedTag;
@@ -139,6 +138,7 @@ void loop(void) {
 
     Serial.println("\nscanned tag: " + scannedTag);
 
+    // handle a unique tag scan
     handleScannedTag(scannedTag);
   }
 
@@ -197,13 +197,8 @@ void updateCloudLights() {
 }
 
 void handleScannedTag(String scannedTag) {
-  // play random interruption 
-  if (loopTime < interruptEndsAt) {
-    interruptEndsAt = 0;
-    Serial.println("interrupted0" + String(random(1, 3)));
-
-    tags[lastScannedTagIndex].scannedAt = 0;
-    
+  // play audio if another tag is scanned before current audio is done
+  if (handleScanTooSoon()) {
     return;
   }
 
@@ -245,5 +240,19 @@ void handleScannedTag(String scannedTag) {
     leds[7] = CRGB(90, 0, 250);
     delay(3000);
   }
+}
+
+// play random interruption 
+bool handleScanTooSoon() {
+  if (loopTime < interruptEndsAt) {
+    interruptEndsAt = 0;
+    Serial.println("interrupted0" + String(random(1, 3)));
+
+    tags[lastScannedTagIndex].scannedAt = 0;
+    
+    return true;
+  }
+
+  return false;
 }
 
