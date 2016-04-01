@@ -37,7 +37,7 @@ String lastScannedTag;
 #define PN532_MISO (5)
 
 #define PINPIXELS   9
-#define NUMPIXELS   6
+#define NUMPIXELS   25
 CRGB leds[NUMPIXELS];
 
 // If using the breakout or shield with I2C, define just the pins connected
