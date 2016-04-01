@@ -11,6 +11,9 @@
 long interruptEndsAt = 0;
 long playedHelloAt = 0;
 long becomeAnnoyedAfter = 5000;
+#define LIGHTING_UPDATE_TIME 100
+
+unsigned long lastLightingUpdate = 0;
 bool playedAnnoyed = false;
 bool playedMusicalGoal = false;
 bool playedFamilyGoal = false;
@@ -73,6 +76,9 @@ void setup(void) {
   tags[21] = { "0x40x880x1700x2340x2010x720x129",  "dogskull", 21, 60000, {random(1, 256), 150, 255}, 0};
   tags[22] = { "0x40x1450x1510x2340x2010x720x129", "knife", 22, 60000, {random(1, 256), 150, 255}, 0};
   tags[23] = { "0x40x2450x1510x2340x2010x720x128", "scroll", 23, 60000, {random(1, 256), 150, 255}, 0};
+
+  FastLED.addLeds<WS2812, PINPIXELS, GRB>(leds, NUMPIXELS);
+  FastLED.setTemperature(Tungsten40W);
   updateCloudLights();
 
   nfc.begin();
@@ -97,8 +103,15 @@ void setup(void) {
 
 int lastScannedTagIndex = -1;
 
+unsigned long loopTime = 0;
+
 void loop(void) {
-  updateCloudLights();
+  loopTime = millis();
+  
+  if ((loopTime - lastLightingUpdate) > LIGHTING_UPDATE_TIME) {
+    lastLightingUpdate = loopTime;
+    updateCloudLights();
+  }
   
   uint8_t success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -214,9 +227,9 @@ bool hasPlayedHello() {
 }
 
 void updateCloudLights() {
-  // base "cloud" pattern
+  // base candle like "cloud" pattern
   for(uint16_t i = 0; i < NUMPIXELS; i++) {
-    CRGB color = CHSV(random8(64), 150, 100);
+    CRGB color = CHSV(random(30, 41), random(150, 255), 255);
     leds[i] = color;
   }
 
