@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <SPI.h>
+#include <Adafruit_PN532.h>
 #include "FastLED.h"
 
 #define BAUD_RATE 9600
