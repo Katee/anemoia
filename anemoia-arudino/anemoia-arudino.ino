@@ -183,7 +183,7 @@ bool hasPlayedHello() {
 void updateCloudLights() {
   // base candle like "cloud" pattern
   for(uint16_t i = 0; i < NUMPIXELS; i++) {
-    CRGB color = CHSV(random(30, 41), random(150, 255), 255);
+    CRGB color = CHSV(random(30, 41), random(150, 255), 100);
     leds[i] = color;
   }
 
