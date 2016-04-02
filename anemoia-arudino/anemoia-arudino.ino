@@ -145,7 +145,7 @@ void loop(void) {
   if (!hasPlayedHello()) {
     int sensorValue = analogRead(A0);
     if (sensorValue > 100) {
-      Serial.println("\nHello0" + String(random(1, 6)));
+      Serial.println("\nplay:hello0" + String(random(1, 6)));
       playedHelloAt = loopTime;
     }
   }
@@ -213,30 +213,30 @@ void handleScannedTag(String scannedTag) {
     tags[i].scannedAt = loopTime;
     interruptEndsAt = tags[i].scannedAt + tags[i].audioLength;
 
-    Serial.println(tags[i].name);
+    Serial.println("play:" + tags[i].name);
   }
 
   if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && !playedMusicalGoal) {
     playedMusicalGoal = true;
-    Serial.println("musicgoal");
+    Serial.println("play:musicgoal");
     leds[0] = CRGB(255, 255, 0);
     delay(3000);
   }
   if (tags[2].scannedAt != 0 && tags[3].scannedAt != 0 && !playedNavigationalGoal) {
     playedNavigationalGoal = true;
-    Serial.println("navigationalgoal");
+    Serial.println("play:navigationalgoal");
     leds[1] = CRGB(65, 150, 0);
     delay(3000);
   }
   if (tags[4].scannedAt != 0 && tags[5].scannedAt != 0 && !playedFamilyGoal) {
     playedFamilyGoal = true;
-    Serial.println("familygoal");
+    Serial.println("play:familygoal");
     leds[2] = CRGB(0, 0, 250);
     delay(3000);
   }
   if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && tags[6].scannedAt != 0 && !playedHistoryGoal) {
     playedHistoryGoal = true;
-    Serial.println("historygoal");
+    Serial.println("play:historygoal");
     leds[7] = CRGB(90, 0, 250);
     delay(3000);
   }
@@ -246,7 +246,7 @@ void handleScannedTag(String scannedTag) {
 bool handleScanTooSoon() {
   if (loopTime < interruptEndsAt) {
     interruptEndsAt = 0;
-    Serial.println("interrupted0" + String(random(1, 3)));
+    Serial.println("play:interrupted0" + String(random(1, 3)));
 
     tags[lastScannedTagIndex].scannedAt = 0;
     

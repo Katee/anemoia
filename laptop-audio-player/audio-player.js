@@ -12,7 +12,11 @@ var player;
 arduino.on("data", function (data) {
   console.log("arudino> " + data);
 
-  var audioFilename = 'audio/' + data.compact() + ".wav";
+  if (!data.startsWith('play:')) {
+    return;
+  }
+
+  var audioFilename = 'audio/' + data.compact().replace('play:', '') + ".wav";
 
   if (fs.existsSync(audioFilename)) {
     if (player != null) {
