@@ -107,7 +107,7 @@ void setup(void) {
     int sensorValue = analogRead(A0);
     Serial.println("pressure sensor: " + String(sensorValue));
     if (sensorValue > 100) {
-      Serial.println("\nplay:hello0" + String(random(1, 6)));
+      playAudio("hello0" + String(random(1, 6)));
       playedHelloAt = loopTime;
     }
   }
@@ -152,7 +152,7 @@ void loop(void) {
 
   if (!playedAnnoyed && !hasScannedTag()
       && ((loopTime - playedHelloAt) > ANNOYED_TIMEOUT)) {
-    Serial.println("\nplay:annoyed0" + String(random(1, 2)));
+    playAudio("annoyed0" + String(random(1, 2)));
     playedAnnoyed = true;
   }
 }
@@ -207,10 +207,10 @@ void handleScannedTag(String scannedTag) {
 
   // after the knife or scroll are scanned only play their "done" audio
   if (inKnifeEndState) {
-    Serial.println("play:knife-done");
+    playAudio("knife-done");
     return;
   } else if (inScrollEndState) {
-    Serial.println("play:scroll-done");
+    playAudio("scroll-done");
     return;
   }
 
@@ -233,9 +233,9 @@ void handleScannedTag(String scannedTag) {
       tags[i].scannedAt = loopTime;
       interruptEndsAt = tags[i].scannedAt + tags[i].audioLength;
   
-      Serial.println("play:" + tags[i].name);
+      playAudio(tags[i].name);
     } else {
-      Serial.println("play:toldyou0" + String(random(1, 5)));
+      playAudio("toldyou0" + String(random(1, 5)));
     }
   }
 }
@@ -247,9 +247,9 @@ bool handleScanTooSoon() {
     tags[lastScannedTagIndex].scannedAt = 0;
 
     if (timesInterrupted < MAX_TIMES_INTERUPPTED) {
-      Serial.println("play:interrupted0" + String(random(1, 3)));
+      playAudio("interrupted0" + String(random(1, 3)));
     } else {
-      Serial.println("play:leavenow");
+      playAudio("leavenow");
       enterEndState();
     }
 
@@ -263,5 +263,9 @@ bool handleScanTooSoon() {
 
 void enterEndState() {
   while (1); // halt
+}
+
+void playAudio(String audioName) {
+  Serial.println("play:" + audioName);
 }
 
