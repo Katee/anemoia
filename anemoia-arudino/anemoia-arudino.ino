@@ -304,7 +304,12 @@ bool handleScanTooSoon() {
 }
 
 void enterEndState() {
+  lightsFadeOff();
   while (1); // halt
+}
+
+void lightsFadeOff() {
+  // TODO fade off lights
 }
 
 void playAudio(String audioName) {
