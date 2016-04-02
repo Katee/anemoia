@@ -15,10 +15,6 @@ unsigned long lastLightingUpdate = 0;
 unsigned long interruptEndsAt = 0;
 unsigned long playedHelloAt = 0;
 bool playedAnnoyed = false;
-bool playedMusicalGoal = false;
-bool playedFamilyGoal = false;
-bool playedNavigationalGoal = false;
-bool playedHistoryGoal = false;
 
 struct tag {
   String tag;
@@ -218,31 +214,6 @@ void handleScannedTag(String scannedTag) {
     } else {
       Serial.println("play:toldyou0" + String(random(1, 5)));
     }
-  }
-
-  if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && !playedMusicalGoal) {
-    playedMusicalGoal = true;
-    Serial.println("play:musicgoal");
-    leds[0] = CRGB(255, 255, 0);
-    delay(3000);
-  }
-  if (tags[2].scannedAt != 0 && tags[3].scannedAt != 0 && !playedNavigationalGoal) {
-    playedNavigationalGoal = true;
-    Serial.println("play:navigationalgoal");
-    leds[1] = CRGB(65, 150, 0);
-    delay(3000);
-  }
-  if (tags[4].scannedAt != 0 && tags[5].scannedAt != 0 && !playedFamilyGoal) {
-    playedFamilyGoal = true;
-    Serial.println("play:familygoal");
-    leds[2] = CRGB(0, 0, 250);
-    delay(3000);
-  }
-  if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && tags[6].scannedAt != 0 && !playedHistoryGoal) {
-    playedHistoryGoal = true;
-    Serial.println("play:historygoal");
-    leds[7] = CRGB(90, 0, 250);
-    delay(3000);
   }
 }
 
