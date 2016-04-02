@@ -97,7 +97,14 @@ void setup(void) {
   // dont't wait forvever
   nfc.setPassiveActivationRetries(0x02);
 
-  Serial.println("Waiting to scan object ...");
+  // wait until they trigger the pressure sensor
+  while (!hasPlayedHello()) {
+    int sensorValue = analogRead(A0);
+    if (sensorValue > 100) {
+      Serial.println("\nplay:hello0" + String(random(1, 6)));
+      playedHelloAt = millis();
+    }
+  }
 }
 
 int lastScannedTagIndex = -1;
@@ -142,13 +149,6 @@ void loop(void) {
     handleScannedTag(scannedTag);
   }
 
-  if (!hasPlayedHello()) {
-    int sensorValue = analogRead(A0);
-    if (sensorValue > 100) {
-      Serial.println("\nplay:hello0" + String(random(1, 6)));
-      playedHelloAt = loopTime;
-    }
-  }
   
   if (!playedAnnoyed && !hasScannedTag() && hasPlayedHello() && ((loopTime - playedHelloAt) > becomeAnnoyedAfter)) {
     Serial.println("\nannoyed0" + String(random(1, 2)));
