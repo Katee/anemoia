@@ -200,7 +200,7 @@ void updateCloudLights(unsigned long currentTime) {
   
   // base candle like "cloud" pattern
   for(int i = 0; i < NUMPIXELS; i++) {
-    CRGB color = CHSV(random(30, 41), random(150, 255), 100);
+    CRGB color = CHSV(random(30, 41), random(150, 255), 50);
     leds[i] = color;
   }
 
@@ -229,7 +229,7 @@ void updateWindowLights() {
   
   // base candle like "cloud" pattern
   for(uint16_t i = 0; i < NUM_WINDOW_PIXELS; i++) {
-    CRGB color = CHSV(random(30, 41), random(150, 255), 100);
+    CRGB color = CHSV(random(30, 41), random(150, 255), 200);
     windowLeds[i] = color;
   }
 
