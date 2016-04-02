@@ -43,6 +43,8 @@ CRGB leds[NUMPIXELS];
 #define PN532_RESET (3)  // Not connected by default on the NFC Shield
 Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 
+unsigned long loopTime = 0;
+
 void setup(void) {
   Serial.begin(BAUD_RATE);
   // search for "struct tag" to see what these values correspond to
@@ -73,7 +75,6 @@ void setup(void) {
 
   FastLED.addLeds<WS2812, PINPIXELS, GRB>(leds, NUMPIXELS);
   FastLED.setTemperature(Tungsten40W);
-  updateCloudLights();
 
   nfc.begin();
   uint32_t versiondata = nfc.getFirmwareVersion();
@@ -93,26 +94,25 @@ void setup(void) {
   nfc.setPassiveActivationRetries(0x02);
 
   // wait until they trigger the pressure sensor
-  while (!hasPlayedHello()) {
+  while (playedHelloAt == 0) {
+    loopTime = millis();
+    updateCloudLights(loopTime);
+    
     int sensorValue = analogRead(A0);
+    Serial.println("pressure sensor: " + String(sensorValue));
     if (sensorValue > 100) {
       Serial.println("\nplay:hello0" + String(random(1, 6)));
-      playedHelloAt = millis();
+      playedHelloAt = loopTime;
     }
   }
 }
 
 int lastScannedTagIndex = -1;
 
-unsigned long loopTime = 0;
-
 void loop(void) {
   loopTime = millis();
-  
-  if ((loopTime - lastLightingUpdate) > LIGHTING_UPDATE_TIME) {
-    lastLightingUpdate = loopTime;
-    updateCloudLights();
-  }
+
+  updateCloudLights(loopTime);
   
   uint8_t success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -170,11 +170,13 @@ bool hasScannedTag() {
   return false;
 }
 
-bool hasPlayedHello() {
-  return playedHelloAt != 0;
-}
-
-void updateCloudLights() {
+void updateCloudLights(unsigned long currentTime) {
+  if ((loopTime - lastLightingUpdate) > LIGHTING_UPDATE_TIME) {
+    lastLightingUpdate = currentTime;
+  } else {
+    return;
+  }
+  
   // base candle like "cloud" pattern
   for(uint16_t i = 0; i < NUMPIXELS; i++) {
     CRGB color = CHSV(random(30, 41), random(150, 255), 100);
