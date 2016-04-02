@@ -101,11 +101,11 @@ void setup(void) {
   nfc.begin();
   uint32_t versiondata = nfc.getFirmwareVersion();
   if (! versiondata) {
-    Serial.print("Abort! No RFID reader found.");
+    Serial.println("Abort! No RFID reader found.");
     while (1); // halt
   }
   // Got ok data, print it out!
-  Serial.print("Found RFID reader"); Serial.println((versiondata >> 24) & 0xFF, HEX);
+  Serial.println("Found RFID reader");
 
   // configure board to read RFID tags
   nfc.SAMConfig();
