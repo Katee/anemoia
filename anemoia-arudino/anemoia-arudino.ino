@@ -48,6 +48,11 @@ Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 
 unsigned long loopTime = 0;
 
+unsigned int knifeIndex = 22;
+unsigned int scrollIndex = 23;
+bool inKnifeEndState = false;
+bool inScrollEndState = false;
+
 void setup(void) {
   Serial.begin(BAUD_RATE);
   // search for "struct tag" to see what these values correspond to
@@ -200,6 +205,15 @@ void handleScannedTag(String scannedTag) {
     return;
   }
 
+  // after the knife or scroll are scanned only play their "done" audio
+  if (inKnifeEndState) {
+    Serial.println("play:knife-done");
+    return;
+  } else if (inScrollEndState) {
+    Serial.println("play:scroll-done");
+    return;
+  }
+
   for (int i = 0; i < NUM_TAGS; i++) {
     // ignore the ones that don't match
     if (scannedTag != tags[i].tag) {
@@ -207,6 +221,12 @@ void handleScannedTag(String scannedTag) {
     }
 
     lastScannedTagIndex = i;
+
+    if (lastScannedTagIndex == knifeIndex) {
+      inKnifeEndState = true;
+    } else if (lastScannedTagIndex == scrollIndex) {
+      inScrollEndState = true;
+    }
 
     // has never scanned this tag before
     if (tags[i].scannedAt == 0) {
@@ -229,7 +249,8 @@ bool handleScanTooSoon() {
     if (timesInterrupted < MAX_TIMES_INTERUPPTED) {
       Serial.println("play:interrupted0" + String(random(1, 3)));
     } else {
-      enterEndState("leavenow");
+      Serial.println("play:leavenow");
+      enterEndState();
     }
 
     timesInterrupted++;
@@ -240,8 +261,7 @@ bool handleScanTooSoon() {
   return false;
 }
 
-void enterEndState(String audioFile) {
-  Serial.println("play:" + audioFile);
+void enterEndState() {
   while (1); // halt
 }
 
