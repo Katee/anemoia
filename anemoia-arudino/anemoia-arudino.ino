@@ -9,12 +9,11 @@
 #define NUM_TAGS   25
 
 #define LIGHTING_UPDATE_TIME 100
+#define ANNOYED_TIMEOUT 90000
 
 unsigned long lastLightingUpdate = 0;
-
 unsigned long interruptEndsAt = 0;
 unsigned long playedHelloAt = 0;
-unsigned long becomeAnnoyedAfter = 5000;
 bool playedAnnoyed = false;
 bool playedMusicalGoal = false;
 bool playedFamilyGoal = false;
@@ -149,9 +148,9 @@ void loop(void) {
     handleScannedTag(scannedTag);
   }
 
-  
-  if (!playedAnnoyed && !hasScannedTag() && hasPlayedHello() && ((loopTime - playedHelloAt) > becomeAnnoyedAfter)) {
-    Serial.println("\nannoyed0" + String(random(1, 2)));
+  if (!playedAnnoyed && !hasScannedTag()
+      && ((loopTime - playedHelloAt) > ANNOYED_TIMEOUT)) {
+    Serial.println("\nplay:annoyed0" + String(random(1, 2)));
     playedAnnoyed = true;
   }
 }
