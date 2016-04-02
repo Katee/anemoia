@@ -208,11 +208,16 @@ void handleScannedTag(String scannedTag) {
     }
 
     lastScannedTagIndex = i;
-    
-    tags[i].scannedAt = loopTime;
-    interruptEndsAt = tags[i].scannedAt + tags[i].audioLength;
 
-    Serial.println("play:" + tags[i].name);
+    // has never scanned this tag before
+    if (tags[i].scannedAt == 0) {
+      tags[i].scannedAt = loopTime;
+      interruptEndsAt = tags[i].scannedAt + tags[i].audioLength;
+  
+      Serial.println("play:" + tags[i].name);
+    } else {
+      Serial.println("play:toldyou0" + String(random(1, 5)));
+    }
   }
 
   if (tags[0].scannedAt != 0 && tags[1].scannedAt != 0 && !playedMusicalGoal) {
