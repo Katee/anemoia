@@ -259,9 +259,9 @@ void handleScannedTag(String scannedTag) {
 
     lastScannedTagIndex = i;
 
-    if (lastScannedTagIndex == knifeIndex) {
+    if (i == knifeIndex) {
       inKnifeEndStateAt = millis() + tags[i].audioLength;
-    } else if (lastScannedTagIndex == scrollIndex) {
+    } else if (i == scrollIndex) {
       inScrollEndStateAt = millis() + tags[i].audioLength;
     }
 
