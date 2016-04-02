@@ -36,9 +36,18 @@ String lastScannedTag;
 #define PN532_SS   (4)
 #define PN532_MISO (5)
 
-#define PINPIXELS   9
-#define NUMPIXELS   27
-CRGB leds[NUMPIXELS];
+#define PINPIXELS_1   9
+#define PINPIXELS_2   10
+#define NUMPIXELS_1   17
+#define NUMPIXELS_2   13
+#define NUMPIXELS     30
+CRGB leds_1[NUMPIXELS_1];
+CRGB leds_2[NUMPIXELS_2];
+CRGB leds[NUMPIXELS_1 + NUMPIXELS_2];
+
+#define PIN_WINDOW_PIXELS   11
+#define NUM_WINDOW_PIXELS   30
+CRGB windowLeds[NUM_WINDOW_PIXELS];
 
 // If using the breakout or shield with I2C, define just the pins connected
 // to the IRQ and reset lines.  Use the values below (2, 3) for the shield!
@@ -84,7 +93,9 @@ void setup(void) {
   tags[25] = { "0x40x2440x1510x2340x2010x720x128", "book", 25, 60000, 0};
   tags[26] = { "0x40x1400x1500x2340x2010x720x129", "chickenbone", 26, 60000, 0};
 
-  FastLED.addLeds<WS2812, PINPIXELS, GRB>(leds, NUMPIXELS);
+  FastLED.addLeds<WS2812, PINPIXELS_1, RGB>(leds_1, NUMPIXELS_1);
+  FastLED.addLeds<WS2812, PINPIXELS_2, RGB>(leds_2, NUMPIXELS_2);
+  FastLED.addLeds<WS2812, PIN_WINDOW_PIXELS, GRB>(windowLeds, NUM_WINDOW_PIXELS);
   FastLED.setTemperature(Tungsten40W);
 
   nfc.begin();
@@ -122,6 +133,7 @@ void loop(void) {
   loopTime = millis();
 
   updateCloudLights(loopTime);
+  updateWindowLights();
   
   uint8_t success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -187,7 +199,7 @@ void updateCloudLights(unsigned long currentTime) {
   }
   
   // base candle like "cloud" pattern
-  for(uint16_t i = 0; i < NUMPIXELS; i++) {
+  for(int i = 0; i < NUMPIXELS; i++) {
     CRGB color = CHSV(random(30, 41), random(150, 255), 100);
     leds[i] = color;
   }
@@ -197,6 +209,28 @@ void updateCloudLights(unsigned long currentTime) {
     if (tags[i].scannedAt != 0) {
       leds[tags[i].ledIndex] = CHSV(random(30, 41), random(150, 255), 255);
     }
+  }
+
+  for(int i = 0; i < NUMPIXELS; i++) {
+    if (i < NUMPIXELS_1) {
+      leds_1[i] = leds[i];
+    } else {
+      leds_2[i - NUMPIXELS_1] = leds[i];
+    }
+  }
+
+  FastLED.show();
+}
+
+void updateWindowLights() {
+  if (!(loopTime - lastLightingUpdate) > LIGHTING_UPDATE_TIME) {
+    return;
+  }
+  
+  // base candle like "cloud" pattern
+  for(uint16_t i = 0; i < NUM_WINDOW_PIXELS; i++) {
+    CRGB color = CHSV(random(30, 41), random(150, 255), 100);
+    windowLeds[i] = color;
   }
 
   FastLED.show();
