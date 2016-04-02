@@ -16,6 +16,9 @@ unsigned long interruptEndsAt = 0;
 unsigned long playedHelloAt = 0;
 bool playedAnnoyed = false;
 
+unsigned int timesInterrupted = 0;
+#define MAX_TIMES_INTERUPPTED 3
+
 struct tag {
   String tag;
   String name;
@@ -221,13 +224,24 @@ void handleScannedTag(String scannedTag) {
 bool handleScanTooSoon() {
   if (loopTime < interruptEndsAt) {
     interruptEndsAt = 0;
-    Serial.println("play:interrupted0" + String(random(1, 3)));
-
     tags[lastScannedTagIndex].scannedAt = 0;
+
+    if (timesInterrupted < MAX_TIMES_INTERUPPTED) {
+      Serial.println("play:interrupted0" + String(random(1, 3)));
+    } else {
+      enterEndState("leavenow");
+    }
+
+    timesInterrupted++;
     
     return true;
   }
 
   return false;
+}
+
+void enterEndState(String audioFile) {
+  Serial.println("play:" + audioFile);
+  while (1); // halt
 }
 
