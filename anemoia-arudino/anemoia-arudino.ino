@@ -79,13 +79,11 @@ void setup(void) {
   nfc.begin();
   uint32_t versiondata = nfc.getFirmwareVersion();
   if (! versiondata) {
-    Serial.print("Didn't find PN53x board");
+    Serial.print("Abort! No RFID reader found.");
     while (1); // halt
   }
   // Got ok data, print it out!
-  Serial.print("Found chip PN5"); Serial.println((versiondata >> 24) & 0xFF, HEX);
-  Serial.print("Firmware ver. "); Serial.print((versiondata >> 16) & 0xFF, DEC);
-  Serial.print('.'); Serial.println((versiondata >> 8) & 0xFF, DEC);
+  Serial.print("Found RFID reader"); Serial.println((versiondata >> 24) & 0xFF, HEX);
 
   // configure board to read RFID tags
   nfc.SAMConfig();
