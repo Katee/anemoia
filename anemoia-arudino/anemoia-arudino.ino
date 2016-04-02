@@ -50,8 +50,8 @@ unsigned long loopTime = 0;
 
 unsigned int knifeIndex = 23;
 unsigned int scrollIndex = 24;
-bool inKnifeEndState = false;
-bool inScrollEndState = false;
+unsigned long inKnifeEndStateAt = 0;
+unsigned long inScrollEndStateAt = 0;
 
 void setup(void) {
   Serial.begin(BAUD_RATE);
@@ -203,17 +203,17 @@ void updateCloudLights(unsigned long currentTime) {
 }
 
 void handleScannedTag(String scannedTag) {
-  // play audio if another tag is scanned before current audio is done
-  if (handleScanTooSoon()) {
+  // after the knife or scroll are scanned only play their "done" audio
+  if (inKnifeEndStateAt != 0 && inKnifeEndStateAt < millis()) {
+    playAudio("knife-done");
+    return;
+  } else if (inScrollEndStateAt != 0 && inScrollEndStateAt < millis()) {
+    playAudio("scroll-done");
     return;
   }
 
-  // after the knife or scroll are scanned only play their "done" audio
-  if (inKnifeEndState) {
-    playAudio("knife-done");
-    return;
-  } else if (inScrollEndState) {
-    playAudio("scroll-done");
+  // play audio if another tag is scanned before current audio is done
+  if (handleScanTooSoon()) {
     return;
   }
 
@@ -226,9 +226,9 @@ void handleScannedTag(String scannedTag) {
     lastScannedTagIndex = i;
 
     if (lastScannedTagIndex == knifeIndex) {
-      inKnifeEndState = true;
+      inKnifeEndStateAt = millis() + tags[i].audioLength;
     } else if (lastScannedTagIndex == scrollIndex) {
-      inScrollEndState = true;
+      inScrollEndStateAt = millis() + tags[i].audioLength;
     }
 
     // has never scanned this tag before
@@ -257,6 +257,11 @@ bool handleScanTooSoon() {
     }
 
     timesInterrupted++;
+
+    // if we would have entered an end but were interrupted
+    // don't enter that end state
+    inKnifeEndStateAt = 0;
+    inScrollEndStateAt = 0;
     
     return true;
   }
