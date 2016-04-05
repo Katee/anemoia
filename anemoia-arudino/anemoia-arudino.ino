@@ -57,8 +57,7 @@ Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 
 unsigned long loopTime = 0;
 
-unsigned int knifeIndex = 23;
-unsigned int scrollIndex = 24;
+unsigned int scrollIndex = 23;
 unsigned long inKnifeEndStateAt = 0;
 unsigned long inScrollEndStateAt = 0;
 
@@ -88,10 +87,8 @@ void setup(void) {
   tags[20] = { "0x40x1250x1500x2340x2010x720x129", "crowvial", 20, 60000, 0};
   tags[21] = { "0x40x880x1700x2340x2010x720x129",  "dogskull", 21, 60000, 0};
   tags[22] = { "0x40x1760x1510x2340x2010x720x128", "vial", 22, 60000, 0};
-  tags[23] = { "0x40x1450x1510x2340x2010x720x129", "knife", 23, 60000, 0};
-  tags[24] = { "0x40x2450x1510x2340x2010x720x128", "scroll", 24, 60000, 0};
-  tags[25] = { "0x40x2440x1510x2340x2010x720x128", "book", 25, 60000, 0};
-  tags[26] = { "0x40x1400x1500x2340x2010x720x129", "chickenbone", 26, 60000, 0};
+  tags[23] = { "0x40x2450x1510x2340x2010x720x128", "scroll", 23, 60000, 0};
+  tags[24] = { "0x40x2440x1510x2340x2010x720x128", "book", 24, 60000, 0};
 
   FastLED.addLeds<WS2812, PINPIXELS_1, RGB>(leds_1, NUMPIXELS_1);
   FastLED.addLeds<WS2812, PINPIXELS_2, RGB>(leds_2, NUMPIXELS_2);
@@ -121,7 +118,7 @@ void setup(void) {
     int sensorValue = analogRead(A0);
     Serial.println("pressure sensor: " + String(sensorValue));
     if (sensorValue > 100) {
-      playAudio("hello0" + String(random(1, 6)));
+      playAudio("hello0" + String(random(1, 10)));
       playedHelloAt = loopTime;
     }
   }
@@ -200,7 +197,7 @@ void updateCloudLights(unsigned long currentTime) {
   
   // base candle like "cloud" pattern
   for(int i = 0; i < NUMPIXELS; i++) {
-    CRGB color = CHSV(random(30, 41), random(150, 255), 50);
+    CRGB color = CHSV(random(30, 41), random(150, 255), 100);
     leds[i] = color;
   }
 
@@ -259,9 +256,7 @@ void handleScannedTag(String scannedTag) {
 
     lastScannedTagIndex = i;
 
-    if (i == knifeIndex) {
-      inKnifeEndStateAt = millis() + tags[i].audioLength;
-    } else if (i == scrollIndex) {
+    if (i == scrollIndex) {
       inScrollEndStateAt = millis() + tags[i].audioLength;
     }
 
@@ -272,7 +267,7 @@ void handleScannedTag(String scannedTag) {
   
       playAudio(tags[i].name);
     } else {
-      playAudio("toldyou0" + String(random(1, 5)));
+      playAudio("repeat0" + String(random(1, 5)));
     }
   }
 }
@@ -284,7 +279,7 @@ bool handleScanTooSoon() {
     tags[lastScannedTagIndex].scannedAt = 0;
 
     if (timesInterrupted < MAX_TIMES_INTERUPPTED) {
-      playAudio("interrupted0" + String(random(1, 3)));
+      playAudio("interrupted0" + String(random(1, 7)));
     } else {
       playAudio("leavenow");
       enterEndState();
